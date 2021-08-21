@@ -1,5 +1,5 @@
 @inline up(I::CartesianIndex,a=0) = (2I-2oneunit(I)):(2I-oneunit(I)-δ(a,I))
-@inline down(I::CartesianIndex) = CI((I+2oneunit(I)).I .÷2)
+@inline down(I::CartesianIndex) = CartesianIndex((I+2oneunit(I)).I .÷2)
 
 function restrictML(b::AbstractArray{T}) where T
     N,n = size_u(b)

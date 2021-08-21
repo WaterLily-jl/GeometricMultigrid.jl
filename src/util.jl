@@ -24,6 +24,8 @@ L₂ norm of array `a` excluding ghosts.
 """
 L₂(a) = sum(@inbounds(abs2(a[I])) for I ∈ inside(a))
 
+size_u(a) = (s = size(a); return s[1:end-1],s[end])
+
 """
     @inside <expr>
 
@@ -40,7 +42,7 @@ becomes
 macro inside(ex)
     a,I = Meta.parse.(split(string(ex.args[1]),union("[",",","]")))
     return quote 
-        WaterLily.@loop $ex over $I ∈ inside($a)
+        GeometricMultigrid.@loop $ex over $I ∈ inside($a)
     end |> esc
 end
 macro loop(args...)
