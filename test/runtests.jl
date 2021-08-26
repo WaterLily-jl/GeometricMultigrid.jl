@@ -35,6 +35,16 @@ end
     @test error(x.-cg(A,A*x))<1e-8
 end
 
+@testset "SolveState.jl" begin
+    A,x = setup_2D(3)
+    st = SolveState(x,A,A*x)
+    @test st.r == zeros(9)
+
+    A,x = setup_2D(32)
+    y,_ = solve(A,A*x;inner=32)
+    @test error(x.-y)<1e-8
+end
+
 # function Poisson_test_2D(f,n)
 #     c = zeros(n+2,n+2,2); c[3:n+1,:,1] .= 1; c[:,3:n+1,2] .= 1
 #     p = f(c)

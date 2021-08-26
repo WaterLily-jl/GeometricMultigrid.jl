@@ -6,8 +6,8 @@ export FieldVec, @loop
 include("Poisson.jl")
 export Poisson
 
-# include("SolveState.jl")
-# export SolveState
+include("SolveState.jl")
+export SolveState, GS!, solve!, solve
 
 # include("MultiLevelPoisson.jl")
 # export MultiLevelPoisson,solver!,mult
