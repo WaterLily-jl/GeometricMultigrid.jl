@@ -3,11 +3,12 @@ uuid = "ec3bce20-3e4b-4d8a-a801-89defc82be1c"
 authors = ["Gabriel Weymouth <gabriel.weymouth@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+
 [compat]
 julia = "1"
 
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["Test"]
+IterativeSolvers = "42fd0dbc-a981-5370-80f2-aaf504508153"
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"

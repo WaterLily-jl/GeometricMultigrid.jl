@@ -1,12 +1,15 @@
 module GeometricMultigrid
 
-include("util.jl")
-export L₂
+include("FieldVec.jl")
+export FieldVec, @loop
 
 include("Poisson.jl")
-export AbstractPoisson,Poisson,solver!,mult
+export Poisson
 
-include("MultiLevelPoisson.jl")
-export MultiLevelPoisson,solver!,mult
+# include("SolveState.jl")
+# export SolveState
+
+# include("MultiLevelPoisson.jl")
+# export MultiLevelPoisson,solver!,mult
 
 end
