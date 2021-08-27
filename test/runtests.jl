@@ -23,7 +23,7 @@ end
 
 @testset "Poisson.jl" begin
     A,x = setup_2D(3)
-    @test FieldVec(A.D) == -Float64[2,3,2,3,4,3,2,3,2]
+    @test diag(A) == -Float64[2,3,2,3,4,3,2,3,2]
     @test det(A) == 0
     b = A*x
     @test b == repeat(Float64[1,0,-1],3)
@@ -36,41 +36,19 @@ end
 end
 
 @testset "SolveState.jl" begin
-    A,x = setup_2D(3)
-    st = SolveState(x,A,A*x)
-    @test st.r == zeros(9)
-
     A,x = setup_2D(32)
-    y,_ = solve(A,A*x;inner=32)
+    @test GeometricMultigrid.residual(A,x,A*x) == zero(x)
+    y,_ = gs(A,A*x)
     @test error(x.-y)<1e-8
 end
 
-# function Poisson_test_2D(f,n)
-#     c = zeros(n+2,n+2,2); c[3:n+1,:,1] .= 1; c[:,3:n+1,2] .= 1
-#     p = f(c)
-#     soln = Float64[ i for i ∈ 1:n+2, j ∈ 1:n+2]
-#     b = mult(p,soln)
-#     x = zeros(n+2,n+2)
-#     solver!(x,p,b)
-#     x .-= (x[2,2]-soln[2,2])
-#     return L₂(x.-soln)/L₂(soln)
-# end
-# function Poisson_test_3D(f,n)
-#     c = zeros(n+2,n+2,n+2,3); c[3:n+1,:,:,1] .= 1; c[:,3:n+1,:,2] .= 1; c[:,:,3:n+1,3] .= 1
-#     p = f(c)
-#     soln = Float64[ i for i ∈ 1:n+2, j ∈ 1:n+2, k ∈ 1:n+2]
-#     b = mult(p,soln)
-#     x = zeros(n+2,n+2,n+2)
-#     solver!(x,p,b,tol=1e-5)
-#     x .-= (x[2,2,2]-soln[2,2,2])
-#     return L₂(x.-soln)/L₂(soln)
-# end
-
-# @testset "MultiLevelPoisson.jl" begin
-#     I = CartesianIndex(4,3,2)
-#     @test all(GeometricMultigrid.down(J)==I for J ∈ GeometricMultigrid.up(I))
-#     @test_throws AssertionError("MultiLevelPoisson requires size=a2ⁿ, where a<31, n>2") Poisson_test_2D(MultiLevelPoisson,67)
-#     @test_throws AssertionError("MultiLevelPoisson requires size=a2ⁿ, where a<31, n>2") Poisson_test_3D(MultiLevelPoisson,3^4)
-#     @test Poisson_test_2D(MultiLevelPoisson,2^6) < 1e-5
-#     @test Poisson_test_3D(MultiLevelPoisson,2^4) < 1e-5
-# end
+@testset "MultiGrid.jl" begin
+    I = CartesianIndex(4,3,2)
+    @test all(GeometricMultigrid.down(J)==I for J ∈ GeometricMultigrid.up(I))
+    A,x = setup_2D(4)
+    st = mg_state(A,x,x)
+    @test diag(st.child.A) == -2ones(4)
+    A,x = setup_2D(32)
+    y,_ = mg(A,A*x)
+    @test error(x.-y)<1e-8    
+end

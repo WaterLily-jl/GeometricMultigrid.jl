@@ -36,7 +36,6 @@ function Base.getindex(p::Poisson{T}, i::Int, j::Int) where T
 end
 
 @inline δ(i,N::Int) = CartesianIndex(ntuple(j -> j==i ? 1 : 0, N))
-
 @fastmath @inline diag(I::CartesianIndex{N},L) where {N} =
     -sum(@inbounds(L[I,i]+L[I+δ(i,N),i]) for i ∈ 1:N)
 @fastmath @inline multL(I::CartesianIndex{N},L,x) where {N} =
@@ -46,7 +45,7 @@ end
 @fastmath @inline mult(I::CartesianIndex{N},L,D,x) where {N} =
     @inbounds(x[I]*D[I])+multL(I,L,x)+multU(I,L,x)
 
-import LinearAlgebra: mul!,dot
+import LinearAlgebra: mul!,dot,diag
 mul!(b::FieldVec,p::Poisson,x::FieldVec) = (@loop b[I]=mult(I,p.L,p.D,x); b)
 @fastmath function dot(b::FieldVec,p::Poisson,x::FieldVec)
     s = zero(eltype(b))
@@ -55,5 +54,7 @@ mul!(b::FieldVec,p::Poisson,x::FieldVec) = (@loop b[I]=mult(I,p.L,p.D,x); b)
     end
     s
 end
+diag(p::Poisson) = FieldVec(p.D)
+
 import Base: *
 *(p::Poisson,x::FieldVec) = mul!(similar(x),p,x)

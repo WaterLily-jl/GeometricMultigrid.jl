@@ -7,9 +7,9 @@ include("Poisson.jl")
 export Poisson
 
 include("SolveState.jl")
-export SolveState, GS!, solve!, solve
+export SolveState, gs, gs!
 
-# include("MultiLevelPoisson.jl")
-# export MultiLevelPoisson,solver!,mult
+include("MultiGrid.jl")
+export mg_state, mg, mg!
 
 end
