@@ -22,7 +22,7 @@ residual(A,x,b) = resid!(copy(b),A,x)
     st
 end
 
-function iterate!(st::SolveState,iterator!,mxiter=1000,tol=100eps(eltype(st.r)),reslog=false,kw...)
+function iterate!(st::SolveState,iterator!;mxiter=1000,tol=100eps(eltype(st.r)),reslog=false,kw...)
     res,i = norm(st.r),1
     reslog && (hist = Vector{eltype(st.r)}(undef,mxiter); hist[i] = res)
     while res>tol && i<mxiter
