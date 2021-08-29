@@ -27,10 +27,8 @@ prolongate!(a,b) = @loop a[I] = b[down(I)]
 @inline down(I::CartesianIndex) = CartesianIndex((I+2oneunit(I)).I .÷2)
 
 function fill_children!(st::SolveState)
-    !(divisible(st) && isnothing(st.child)) && return
-    st.child = create_child(st.A.L)
-    fill_children!(st.child)
-    st
+    divisible(st) && isnothing(st.child) && fill_children!(create_child(st.A.L))
+    return st
 end
 
 function create_child(b::AbstractArray{T,N}) where {T,N}
