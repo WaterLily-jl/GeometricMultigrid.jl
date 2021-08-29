@@ -48,6 +48,7 @@ end
     A,x = setup_2D(4)
     st = mg_state(A,x,x)
     @test diag(st.child.A) == -2ones(4)
+    @test isnothing(st.child.child)
     A,x = setup_2D(32)
     y,_ = mg(A,A*x)
     @test error(x.-y)<1e-8    

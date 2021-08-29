@@ -16,7 +16,7 @@ struct Poisson{T,Lt<:AbstractArray{T},Dt<:AbstractArray{T},Rt<:CartesianIndices}
     function Poisson(L::AbstractArray{T}) where T
         D = zeros(T,Base.front(size(L)))
         R = inside(D)
-        for I ∈ R; D[I] = diag(I,L); end
+        for I ∈ R; D[I] = calcdiag(I,L); end
         new{T,typeof(L),typeof(D),typeof(R)}(L,D,R)
     end
 end
@@ -36,7 +36,7 @@ function Base.getindex(p::Poisson{T}, i::Int, j::Int) where T
 end
 
 @inline δ(i,N::Int) = CartesianIndex(ntuple(j -> j==i ? 1 : 0, N))
-@fastmath @inline diag(I::CartesianIndex{N},L) where {N} =
+@fastmath @inline calcdiag(I::CartesianIndex{N},L) where {N} =
     -sum(@inbounds(L[I,i]+L[I+δ(i,N),i]) for i ∈ 1:N)
 @fastmath @inline multL(I::CartesianIndex{N},L,x) where {N} =
     sum(@inbounds(x[I-δ(i,N)]*L[I,i]) for i ∈ 1:N)
