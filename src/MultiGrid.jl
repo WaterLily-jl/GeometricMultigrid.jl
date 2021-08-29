@@ -5,15 +5,14 @@ function mg(A::AbstractMatrix,b::AbstractVector;kw...)
 end
 mg_state(A,x,b) = fill_children!(SolveState(A,x,residual(A,x,b)))
 
-function Vcycle!(st::SolveState;smooth!::Function=GS!,kw...)
-    fine,coarse = st,st.child
-    # base case
-    isnothing(coarse) && return smooth!(fine;kw...)
+@inline Vcycle!(st::SolveState;kw...) = Vcycle!(st,st.child;kw...)
+@inline Vcycle!(fine::SolveState,coarse::Nothing;smooth!::Function=GS!,kw...) = smooth!(fine;kw...)
+function Vcycle!(fine::SolveState,coarse::SolveState;smooth!::Function=GS!,kw...)
     # set up & solve coarse recursively
     GS!(fine;inner=0)
     restrict!(coarse.r,fine.r)
     fill!(coarse.x,0.)
-    Vcycle!(coarse)
+    Vcycle!(coarse;kw...)
     # correct & solve fine
     prolongate!(fine.ϵ,coarse.x)
     increment!(fine)
