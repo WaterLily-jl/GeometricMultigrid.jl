@@ -12,7 +12,7 @@ mutable struct SolveState{matT<:Poisson, vecT<:FieldVec}
     end
 end
 Base.show(io::IO, ::MIME"text/plain", st::SolveState) = print(io, "SolveState:\n   ", st)
-Base.show(io::IO, st::SolveState) = print(io, "residual=",norm(st.r))
+Base.show(io::IO, st::SolveState) = print(io, "residual=",norm(st.r),"\n   ", st.child)
 
 @fastmath resid!(r,A,x) = (@loop r[I] = r[I]-mult(I,A.L,A.D,x);r)
 residual(A,x,b) = resid!(copy(b),A,x)
@@ -39,7 +39,7 @@ function gs(A::AbstractMatrix,b::AbstractVector;kw...)
     return x,gs!(SolveState(A,x,copy(b));kw...)
 end
 
-@fastmath function GS!(st;inner=floor(Int,√size(st.A,1)))
+@fastmath function GS!(st;inner=8)
     @loop st.ϵ[I] = st.r[I]*st.iD[I]
     for i ∈ 1:inner
         @loop st.ϵ[I] = st.iD[I]*(st.r[I]-multL(I,st.A.L,st.ϵ)-multU(I,st.A.L,st.ϵ))
