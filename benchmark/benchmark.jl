@@ -13,7 +13,7 @@ begin
     for n ∈ nlist
         A,x = setup_2D(n)
         # suite[n] = @benchmarkable mul!($b,$A,$x)
-        suite[n] = @benchmarkable mg!(st;inner=2,tol=r0*1e-8) setup=(st=mg_state($A,zero($x),$A*$x);r0=norm(st.r))
+        suite[n] = @benchmarkable mg!(st;inner=2) setup=(st=mg_state($A,zero($x),$A*$x))
     end
 end
 

@@ -22,15 +22,20 @@ residual(A,x,b) = resid!(copy(b),A,x)
     st
 end
 
-function iterate!(st::SolveState,iterator!;mxiter=1000,tol=100eps(eltype(st.r)),reslog=false,kw...)
-    res,i = norm(st.r),1
-    reslog && (hist = Vector{eltype(st.r)}(undef,mxiter); hist[i] = res)
-    while res>tol && i<mxiter
+epsr(st) = eps(real(eltype(st.r)))
+function iterate!(st::SolveState,iterator!::Function;
+                  abstol::Real = 20*epsr(st),reltol::Real = √epsr(st),
+                  mxiter::Int = size(st.A,2), log::Bool = false, kw...)
+    res0,i = norm(st.r),1
+    log && (hist = Vector{eltype(st.r)}(undef,mxiter); hist[i] = res0)
+    res = res0
+    println(abstol,", ",reltol)
+    while res>max(abstol,reltol*res0) && i<mxiter
         iterator!(st;kw...)
         res,i = norm(st.r),i+1
-        reslog && (hist[i] = res)
+        log && (hist[i] = res)
     end
-    return reslog ? resize!(hist,i) : i
+    return log ? resize!(hist,i) : i
 end
 
 gs!(st::SolveState;kw...) = iterate!(st,GS!;kw...)
