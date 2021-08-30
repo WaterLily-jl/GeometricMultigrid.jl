@@ -38,7 +38,7 @@ end
 @testset "SolveState.jl" begin
     A,x = setup_2D(32)
     @test GeometricMultigrid.residual(A,x,A*x) == zero(x)
-    y,_ = gs(A,A*x)
+    y,_ = gs(A,A*x,reltol=1e-12)
     @test error(x.-y)<1e-8
 end
 
@@ -50,6 +50,6 @@ end
     @test diag(st.child.A) == -2ones(4)
     @test isnothing(st.child.child)
     A,x = setup_2D(32)
-    y,_ = mg(A,A*x)
+    y,_ = mg(A,A*x,reltol=1e-12)
     @test error(x.-y)<1e-8    
 end
