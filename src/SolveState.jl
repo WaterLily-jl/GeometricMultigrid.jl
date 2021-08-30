@@ -29,7 +29,6 @@ function iterate!(st::SolveState,iterator!::Function;
     res0,i = norm(st.r),1
     log && (hist = Vector{eltype(st.r)}(undef,mxiter); hist[i] = res0)
     res = res0
-    println(abstol,", ",reltol)
     while res>max(abstol,reltol*res0) && i<mxiter
         iterator!(st;kw...)
         res,i = norm(st.r),i+1
