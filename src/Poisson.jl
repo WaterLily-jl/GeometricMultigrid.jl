@@ -9,17 +9,18 @@ where `A` is symmetric, block-tridiagonal and extremely sparse. `L` are the lowe
 diagonal components (stored as a multi-dimensional array) and the main diagonal is
 `D[I]=-∑ᵢ(L[I,i]+L'[I,i])`.
 """
-struct Poisson{T,Lt<:AbstractArray{T},Dt<:AbstractArray{T},Rt<:CartesianIndices} <: AbstractMatrix{T}
+struct Poisson{T,N,Lt<:AbstractArray{T},Dt<:AbstractArray{T,N}} <: AbstractMatrix{T}
     L :: Lt # Lower diagonal coefficients
     D :: Dt # Diagonal coefficients
-    R :: Rt # CartesianIndices
+    R :: CartesianIndices{N,NTuple{N,UnitRange{Int}}}
     function Poisson(L::AbstractArray{T}) where T
         D = zeros(T,Base.front(size(L)))
         R = inside(D)
         for I ∈ R; D[I] = calcdiag(I,L); end
-        new{T,typeof(L),typeof(D),typeof(R)}(L,D,R)
+        new{T,getN(R),typeof(L),typeof(D)}(L,D,R)
     end
 end
+getN(::CartesianIndices{N}) where N = N
 Base.size(p::Poisson) = (s = prod(size(p.R)); (s,s))
 Base.IndexStyle(::Type{<:Poisson}) = IndexCartesian()
 function Base.getindex(p::Poisson{T}, i::Int, j::Int) where T
