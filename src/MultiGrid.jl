@@ -14,16 +14,16 @@ function Vcycle!(fine::SolveState,coarse::SolveState;smooth!::Function=GS!,kw...
     fill!(coarse.x,0.)
     Vcycle!(coarse;kw...)
     # correct & solve fine
-    prolongate!(fine.ϵ,coarse.x)
+    prolongate!(fine.ϵ,coarse.x;kw...)
     increment!(fine)
     smooth!(fine;kw...)
 end
 
 restrict!(a,b) = @loop a[I] = sum(@inbounds(b[J]) for J ∈ up(I))
-prolongate!(a,b) = @loop a[I] = b[down(I)]
+prolongate!(a,b;kern::Function=(I,b)->b[down(I)],kw...) = @loop a[I] = kern(I,b)
 
 @inline up(I::CartesianIndex{N},a=0) where N = (2I-2oneunit(I)):(2I-oneunit(I)-δ(a,N))
-@inline down(I::CartesianIndex) = CartesianIndex((I+2oneunit(I)).I .÷2)
+@inline down(I) = CartesianIndex((I+2oneunit(I)).I .÷2)
 
 function fill_children!(st::SolveState)
     if isdivisible(st) && isnothing(st.child)

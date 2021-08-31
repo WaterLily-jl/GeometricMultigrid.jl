@@ -16,7 +16,7 @@ Base.show(io::IO, st::SolveState) = print(io, "residual=",norm(st.r),"\n   ", st
 
 @fastmath resid!(r,A,x) = (@loop r[I] = r[I]-mult(I,A.L,A.D,x);r)
 residual(A,x,b) = resid!(copy(b),A,x)
-@fastmath function increment!(st) 
+@fastmath function increment!(st)
     @loop st.x[I] = st.x[I]+st.ϵ[I]
     resid!(st.r,st.A,st.ϵ)
     st
@@ -43,7 +43,7 @@ function gs(A::AbstractMatrix,b::AbstractVector;kw...)
     return x,gs!(SolveState(A,x,copy(b));kw...)
 end
 
-@fastmath function GS!(st;inner=8)
+@fastmath function GS!(st;inner=8,kw...)
     @loop st.ϵ[I] = st.r[I]*st.iD[I]
     for i ∈ 1:inner
         @loop st.ϵ[I] = st.iD[I]*(st.r[I]-multL(I,st.A.L,st.ϵ)-multU(I,st.A.L,st.ϵ))
