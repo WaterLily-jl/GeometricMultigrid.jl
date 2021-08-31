@@ -27,16 +27,16 @@ prolongate!(a,b;kern::Function=(I,b)->b[down(I)],kw...) = @loop a[I] = kern(I,b)
 
 function fill_children!(st::SolveState)
     if isdivisible(st) && isnothing(st.child)
-        st.child = create_child(st.A.L)
+        st.child = create_child(st.A.L,eltype(st.x))
         fill_children!(st.child)
     end
     return st
 end
 
-function create_child(b::AbstractArray{T,N}) where {T,N}
+function create_child(b::AbstractArray{T,N},xT::Type) where {T,N}
     dims = 1 .+ Base.front(size(b)) .÷ 2
     a = zeros(T,dims...,N)
-    x = FieldVec(zeros(T,dims))
+    x = FieldVec(zeros(xT,dims))
     for i ∈ 1:N-1, I ∈ x.R
         a[I,i] = 0.5sum(@inbounds(b[J,i]) for J ∈ up(I,i))
     end

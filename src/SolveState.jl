@@ -1,21 +1,25 @@
-mutable struct SolveState{matT<:Poisson, vecT<:FieldVec}
+mutable struct SolveState{matT<:Poisson, iDT<:FieldVec, vecT<:FieldVec}
     A::matT
-    iD::vecT
+    iD::iDT
     x::vecT
     r::vecT
     ϵ::vecT
     child::Union{SolveState, Nothing}
-    function SolveState(A::Poisson,x::FieldVec,r::FieldVec,invtol=1e-8)
-        iD = zero(x)
-        @loop iD[I] = abs(A.D[I])>invtol ? inv(A.D[I]) : zero(eltype(A))
-        new{typeof(A),typeof(x)}(A,iD,x,r,zero(x),nothing)
+    function SolveState(A::Poisson{T},x::FieldVec,r::FieldVec,invtol=1e-8) where T
+        iD = zero(x,T)
+        @loop iD[I] = abs(A.D[I])>invtol ? inv(A.D[I]) : zero(T)
+        new{typeof(A),typeof(iD),typeof(x)}(A,iD,x,r,zero(x),nothing)
     end
 end
 Base.show(io::IO, ::MIME"text/plain", st::SolveState) = print(io, "SolveState:\n   ", st)
 Base.show(io::IO, st::SolveState) = print(io, "residual=",norm(st.r),"\n   ", st.child)
 
 @fastmath resid!(r,A,x) = (@loop r[I] = r[I]-mult(I,A.L,A.D,x);r)
-residual(A,x,b) = resid!(copy(b),A,x)
+function residual(A,x,b) 
+    r=zero(x)
+    @loop r[I] = b[I]
+    resid!(r,A,x)
+end
 @fastmath function increment!(st)
     @loop st.x[I] = st.x[I]+st.ϵ[I]
     resid!(st.r,st.A,st.ϵ)

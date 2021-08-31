@@ -21,7 +21,7 @@ struct Poisson{T,N,Lt<:AbstractArray{T},Dt<:AbstractArray{T,N}} <: AbstractMatri
     end
 end
 getN(::CartesianIndices{N}) where N = N
-Base.size(p::Poisson) = (s = prod(size(p.R)); (s,s))
+Base.size(p::Poisson) = (s = length(p.R); (s,s))
 Base.IndexStyle(::Type{<:Poisson}) = IndexCartesian()
 function Base.getindex(p::Poisson{T}, i::Int, j::Int) where T
     if i == j
@@ -49,7 +49,7 @@ end
 import LinearAlgebra: mul!,dot,diag
 mul!(b::FieldVec,p::Poisson,x::FieldVec) = (@loop b[I]=mult(I,p.L,p.D,x); b)
 @fastmath function dot(b::FieldVec,p::Poisson,x::FieldVec)
-    s = zero(eltype(b))
+    s = zero(eltype(x))
     @inbounds @simd for I ∈ b.R
         s+= b[I]*mult(I,p.L,p.D,x)
     end
@@ -58,4 +58,4 @@ end
 diag(p::Poisson) = FieldVec(p.D)
 
 import Base: *
-*(p::Poisson,x::FieldVec) = mul!(similar(x),p,x)
+*(p::Poisson,x::FieldVec) = mul!(zero(x),p,x)

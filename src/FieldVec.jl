@@ -20,7 +20,7 @@ Base.@propagate_inbounds Base.getindex(x::FieldVec, I::CartesianIndex) = x.data[
 Base.@propagate_inbounds Base.setindex!(x::FieldVec, y , i::Int) = x.data[x.R[i]]=y
 Base.@propagate_inbounds Base.setindex!(x::FieldVec, y , I::CartesianIndex) = x.data[I]=y
 Base.similar(x::FieldVec) = FieldVec(similar(x.data),x.R)
-Base.zero(x::FieldVec) = FieldVec(zero(x.data),x.R)
+Base.zero(x::FieldVec,T=eltype(x)) = FieldVec(zeros(T,size(x.data)),x.R)
 
 import LinearAlgebra: dot,norm
 @fastmath function dot(x::FieldVec,y::FieldVec)
