@@ -6,21 +6,22 @@ end
 mg_state(A,x,b) = fill_children!(SolveState(A,x,residual(A,x,b)))
 
 @inline Vcycle!(st::SolveState;kw...) = Vcycle!(st,st.child;kw...)
-@inline Vcycle!(fine::SolveState,coarse::Nothing;smooth!::Function=GS!,kw...) = smooth!(fine;kw...)
-function Vcycle!(fine::SolveState,coarse::SolveState;smooth!::Function=GS!,kw...)
+@inline Vcycle!(fine::SolveState,coarse::Nothing;kw...) = GS!(fine;kw...)
+function Vcycle!(fine::SolveState,coarse::SolveState;
+                 precond!::Function=st->GS!(st,inner=0),smooth!::Function=GS!,kw...)
     # set up & solve coarse recursively
-    GS!(fine;inner=0)
+    precond!(fine)
     restrict!(coarse.r,fine.r)
     fill!(coarse.x,0.)
-    Vcycle!(coarse;kw...)
+    Vcycle!(coarse;resid=false,kw...)
     # correct & solve fine
-    prolongate!(fine.ϵ,coarse.x;kw...)
+    prolongate!(fine.ϵ,coarse.x)
     increment!(fine)
     smooth!(fine;kw...)
 end
 
 restrict!(a,b) = @loop a[I] = sum(@inbounds(b[J]) for J ∈ up(I))
-prolongate!(a,b;kern::Function=(I,b)->b[down(I)],kw...) = @loop a[I] = kern(I,b)
+prolongate!(a,b) = @loop a[I] = b[down(I)]
 
 @inline up(I::CartesianIndex{N},a=0) where N = (2I-2oneunit(I)):(2I-oneunit(I)-δ(a,N))
 @inline down(I) = CartesianIndex((I+2oneunit(I)).I .÷2)

@@ -20,9 +20,9 @@ function residual(A,x,b)
     @loop r[I] = b[I]
     resid!(r,A,x)
 end
-@fastmath function increment!(st)
+@fastmath function increment!(st;resid=true,kw...)
     @loop st.x[I] = st.x[I]+st.ϵ[I]
-    resid!(st.r,st.A,st.ϵ)
+    resid && resid!(st.r,st.A,st.ϵ)
     st
 end
 
@@ -52,5 +52,5 @@ end
     for i ∈ 1:inner
         @loop st.ϵ[I] = st.iD[I]*(st.r[I]-multL(I,st.A.L,st.ϵ)-multU(I,st.A.L,st.ϵ))
     end
-    increment!(st)
+    increment!(st;kw...)
 end
