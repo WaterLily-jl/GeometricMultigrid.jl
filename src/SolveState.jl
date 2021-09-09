@@ -1,4 +1,4 @@
-mutable struct SolveState{matT<:Poisson, iDT<:FieldVec, vecT<:FieldVec}
+mutable struct SolveState{T,matT<:Poisson, iDT<:FieldVec, vecT<:FieldVec}
     A::matT
     iD::iDT
     x::vecT
@@ -8,10 +8,10 @@ mutable struct SolveState{matT<:Poisson, iDT<:FieldVec, vecT<:FieldVec}
     function SolveState(A::Poisson{T},x::FieldVec,r::FieldVec,invtol=1e-8) where T
         iD = zero(x,T)
         @loop iD[I] = abs(A.D[I])>invtol ? inv(A.D[I]) : zero(T)
-        new{typeof(A),typeof(iD),typeof(x)}(A,iD,x,r,zero(x),nothing)
+        new{eltype(x),typeof(A),typeof(iD),typeof(x)}(A,iD,x,r,zero(x),nothing)
     end
 end
-Base.show(io::IO, ::MIME"text/plain", st::SolveState) = print(io, "SolveState:\n   ", st)
+Base.show(io::IO, ::MIME"text/plain", st::SolveState{T}) where T = print(io, "SolveState{",T,"}:\n   ", st)
 Base.show(io::IO, st::SolveState) = print(io, "residual=",norm(st.r),"\n   ", st.child)
 
 @fastmath resid!(r,A,x) = (@loop r[I] = r[I]-mult(I,A.L,A.D,x);r)
