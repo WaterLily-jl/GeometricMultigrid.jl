@@ -54,3 +54,12 @@ end
     end
     increment!(st;kw...)
 end
+
+tuned!(st::SolveState{T},θ::AbstractVector{T}=T[-0.02777439,-0.06331559,-0.50800335,-0.1463638];
+       inner=2,resid=true,kw...) where T = for i=1:inner
+    @loop st.ϵ[I] = Mxr(I,@inbounds(st.A.D[I]),st.r,θ)
+    GeometricMultigrid.increment!(st;resid=(i<inner||resid))
+end
+@fastmath @inline Mxr(I::CartesianIndex{N},D,r,θ) where {N} =
+    muladd(θ[2],D,θ[3])*@inbounds(r[I])+
+    muladd(θ[1],D,θ[4])*sum(@inbounds(r[I-δ(i,N)]+r[I+δ(i,N)]) for i ∈ 1:N)

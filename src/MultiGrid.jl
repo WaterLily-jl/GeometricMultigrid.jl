@@ -8,12 +8,12 @@ mg_state(A,x,b) = fill_children!(SolveState(A,x,residual(A,x,b)))
 @inline Vcycle!(st::SolveState;kw...) = Vcycle!(st,st.child;kw...)
 @inline Vcycle!(fine::SolveState,coarse::Nothing;kw...) = GS!(fine;kw...)
 function Vcycle!(fine::SolveState,coarse::SolveState;
-                 precond!::Function=st->GS!(st,inner=0),smooth!::Function=GS!,kw...)
+                 precond!::Function=st->GS!(st,inner=0),smooth!::Function=tuned!,kw...)
     # set up & solve coarse recursively
     precond!(fine)
     restrict!(coarse.r,fine.r)
     fill!(coarse.x,0.)
-    Vcycle!(coarse;resid=false,kw...)
+    Vcycle!(coarse;precond!,smooth!,resid=false,kw...)
     # correct & solve fine
     prolongate!(fine.ϵ,coarse.x)
     increment!(fine)
