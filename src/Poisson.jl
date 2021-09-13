@@ -1,3 +1,4 @@
+abstract type FieldMatrix{T} <: AbstractMatrix{T} end
 """
     Poisson
 
@@ -9,7 +10,7 @@ where `A` is symmetric, block-tridiagonal and extremely sparse. `L` are the lowe
 diagonal components (stored as a multi-dimensional array) and the main diagonal is
 `D[I]=-∑ᵢ(L[I,i]+L'[I,i])`.
 """
-struct Poisson{T,N,Lt<:AbstractArray{T},Dt<:AbstractArray{T,N}} <: AbstractMatrix{T}
+struct Poisson{T,N,Lt<:AbstractArray{T},Dt<:AbstractArray{T,N}} <: FieldMatrix{T}
     L :: Lt # Lower diagonal coefficients
     D :: Dt # Diagonal coefficients
     R :: CartesianIndices{N,NTuple{N,UnitRange{Int}}}
@@ -21,9 +22,9 @@ struct Poisson{T,N,Lt<:AbstractArray{T},Dt<:AbstractArray{T,N}} <: AbstractMatri
     end
 end
 getN(::CartesianIndices{N}) where N = N
-Base.size(p::Poisson) = (s = length(p.R); (s,s))
-Base.IndexStyle(::Type{<:Poisson}) = IndexCartesian()
-function Base.getindex(p::Poisson{T}, i::Int, j::Int) where T
+Base.size(p::FieldMatrix) = (s = length(p.R); (s,s))
+Base.IndexStyle(::Type{<:FieldMatrix}) = IndexCartesian()
+function Base.getindex(p::FieldMatrix{T}, i::Int, j::Int) where T
     if i == j
         return p.D[p.R[i]]
     else
@@ -47,15 +48,15 @@ end
     @inbounds(x[I]*D[I])+multL(I,L,x)+multU(I,L,x)
 
 import LinearAlgebra: mul!,dot,diag
-mul!(b::FieldVec,p::Poisson,x::FieldVec) = (@loop b[I]=mult(I,p.L,p.D,x); b)
-@fastmath function dot(b::FieldVec,p::Poisson,x::FieldVec)
+mul!(b::FieldVec,p::FieldMatrix,x::FieldVec) = (@loop b[I]=mult(I,p.L,p.D,x); b)
+@fastmath function dot(b::FieldVec,p::FieldMatrix,x::FieldVec)
     s = zero(eltype(x))
     @inbounds @simd for I ∈ b.R
         s+= b[I]*mult(I,p.L,p.D,x)
     end
     s
 end
-diag(p::Poisson) = FieldVec(p.D)
+diag(p::FieldMatrix) = FieldVec(p.D)
 
 import Base: *
-*(p::Poisson,x::FieldVec) = mul!(zero(x),p,x)
+*(p::FieldMatrix,x::FieldVec) = mul!(zero(x),p,x)
