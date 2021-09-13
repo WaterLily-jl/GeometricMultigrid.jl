@@ -5,10 +5,11 @@ mutable struct SolveState{T,matT<:Poisson, iDT<:FieldVec, vecT<:FieldVec}
     r::vecT
     ϵ::vecT
     child::Union{SolveState, Nothing}
+    P::Union{FieldMatrix, Nothing}
     function SolveState(A::Poisson{T},x::FieldVec,r::FieldVec,invtol=1e-8) where T
         iD = zero(x,T)
         @loop iD[I] = abs(A.D[I])>invtol ? inv(A.D[I]) : zero(T)
-        new{eltype(x),typeof(A),typeof(iD),typeof(x)}(A,iD,x,r,zero(x),nothing)
+        new{eltype(x),typeof(A),typeof(iD),typeof(x)}(A,iD,x,r,zero(x),nothing,nothing)
     end
 end
 Base.show(io::IO, ::MIME"text/plain", st::SolveState{T}) where T = print(io, "SolveState{",T,"}:\n   ", st)
@@ -30,15 +31,15 @@ epsr(st) = eps(real(eltype(st.r)))
 function iterate!(st::SolveState,iterator!::Function;
                   abstol::Real = 20*epsr(st),reltol::Real = √epsr(st),
                   mxiter::Int = size(st.A,2), log::Bool = false, kw...)
-    res0,i = norm(st.r),1
-    log && (hist = Vector{eltype(st.r)}(undef,mxiter); hist[i] = res0)
+    res0,i = norm(st.r),0
+    log && (hist = Vector{eltype(st.r)}(undef,mxiter+1); hist[1] = res0)
     res = res0
     while res>max(abstol,reltol*res0) && i<mxiter
         iterator!(st;kw...)
         res,i = norm(st.r),i+1
-        log && (hist[i] = res)
+        log && (hist[i+1] = res)
     end
-    return log ? resize!(hist,i) : i
+    return log ? resize!(hist,i+1) : i
 end
 
 gs!(st::SolveState;kw...) = iterate!(st,GS!;kw...)
@@ -54,12 +55,3 @@ end
     end
     increment!(st;kw...)
 end
-
-tuned!(st::SolveState{T},θ::AbstractVector{T}=T[-0.02777439,-0.06331559,-0.50800335,-0.1463638];
-       inner=2,resid=true,kw...) where T = for i=1:inner
-    @loop st.ϵ[I] = Mxr(I,@inbounds(st.A.D[I]),st.r,θ)
-    increment!(st;resid=(i<inner||resid))
-end
-@fastmath @inline Mxr(I::CartesianIndex{N},D,r,θ) where {N} =
-    muladd(θ[2],D,θ[3])*@inbounds(r[I])+
-    muladd(θ[1],D,θ[4])*sum(@inbounds(r[I-δ(i,N)]+r[I+δ(i,N)]) for i ∈ 1:N)
