@@ -28,7 +28,7 @@ function Base.getindex(p::FieldMatrix{T}, i::Int, j::Int) where T
     if i == j
         return p.D[p.R[i]]
     else
-        N = length(size(p))
+        N = length(size(p.R))
         for d ∈ 1:N
             p.R[i]==p.R[j]+δ(d,N) && return p.L[p.R[i],d]
             p.R[i]==p.R[j]-δ(d,N) && return p.L[p.R[j],d]
