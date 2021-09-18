@@ -4,12 +4,12 @@ struct PseudoInv{T,N,Lt<:AbstractArray{T},Dt<:AbstractArray{T,N}} <: FieldMatrix
     R :: CartesianIndices{N,NTuple{N,UnitRange{Int}}}
 end
 function PseudoInv(A::FieldMatrix; scale=maximum(A.L),
-                   p::AbstractVector{T}=Float32[-0.19,0.36,0.23,-0.20],
-                   models=p->(D->D*(p[3]*D+p[1])+1,L->L*(p[4]*L+p[2]))) where T
+                   p::AbstractVector{T}=Float32[-0.1449,-0.0162,0.00734,0.3635,-0.2018],
+                   models=p->(D->1+p[1]+D*(p[2]+D*p[3]),L->L*(p[4]+L*p[5]))) where T
     L,D,N = zeros(T,size(A.L)),zeros(T,size(A.D)),size(A.L)[end]
     Dm,Lm = models(p)
     for I ∈ A.R
-        D[I] = Dm(A.D[I]/(-2N*scale))
+        D[I] = Dm(A.D[I]/scale)
         for i ∈ 1:N
             L[I,i] = Lm(A.L[I,i]/scale)
         end
