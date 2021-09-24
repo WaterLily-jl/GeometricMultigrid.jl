@@ -1,4 +1,4 @@
-mg!(st::SolveState;kw...) = iterate!(st,Vcycle!;kw...)
+mg!(st::SolveState;kw...) = iterate!(st,Vcycle!;mxiter=32,kw...)
 function mg(A::AbstractMatrix,b::AbstractVector;kw...) 
     x=zero(b)
     return x,mg!(mg_state(A,x,b);kw...)
