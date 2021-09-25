@@ -48,10 +48,10 @@ function gs(A::AbstractMatrix,b::AbstractVector;kw...)
     return x,gs!(SolveState(A,x,copy(b));kw...)
 end
 
-@fastmath function GS!(st;inner=8,kw...)
+@fastmath function GS!(st;inner=2,kw...)
     @loop st.ϵ[I] = st.r[I]*st.iD[I]
-    for i ∈ 1:inner
-        @loop st.ϵ[I] = st.iD[I]*(st.r[I]-multL(I,st.A.L,st.ϵ)-multU(I,st.A.L,st.ϵ))
+    @inbounds for _ ∈ 1:inner, I ∈ st.iD.R
+        st.ϵ[I] = st.iD[I]*(st.r[I]-multL(I,st.A.L,st.ϵ)-multU(I,st.A.L,st.ϵ))
     end
     increment!(st;kw...)
 end
