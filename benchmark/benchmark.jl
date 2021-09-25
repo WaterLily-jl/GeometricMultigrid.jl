@@ -11,8 +11,8 @@ begin
     nlist = 2 .^ (3:10)
     for n ∈ nlist
         A,x = setup_2D(n,Float32)
-        suite["mg-gs",n] = @benchmarkable mg!(st;inner=2) setup=(st=mg_state($A,zero($x),$A*$x))
-        suite["pseudo",n] = @benchmarkable mg!(st;inner=2) setup=(st=mg_state($A,zero($x),$A*$x,pseudo=true))
+        suite["mg-gs",n] = @benchmarkable mg!(st) setup=(st=mg_state($A,zero($x),$A*$x))
+        suite["pseudo",n] = @benchmarkable mg!(st) setup=(st=mg_state($A,zero($x),$A*$x,pseudo=true))
     end
 end
 
@@ -25,8 +25,8 @@ begin
     ptime = [minimum(results["pseudo",n]).time for n ∈ nlist]
     plot(N,time[end]/N[end] .* N, color=:grey, label="N", legend=:bottomright)
     plot!(N,time[end]/nlogn(N[end]) .* nlogn.(N) , color=:black, label="NlogN")
-    scatter!(N,time, xaxis=("length x",:log10), yaxis=("time (ns)",:log10), label="mg-GS")
-    scatter!(N,ptime, xaxis=("length x",:log10), yaxis=("time (ns)",:log10), label="mg-pseudo")
+    scatter!(N,time, xaxis=("length x",:log10), yaxis=("time (ns)",:log10), label="mg!")
+    # scatter!(N,ptime, xaxis=("length x",:log10), yaxis=("time (ns)",:log10), label="pseudo=true")
 end
 
 savefig("MGscaling.png")
@@ -38,11 +38,10 @@ begin
     st.P = PseudoInv(A)
 end
 @btime norm($x)  # 5.3 μs
-@btime dot($b,$x) # 7.0 μs
+@btime dot($b,$x) # 7.8 μs
 @btime dot($b,$A,$x) # 29.5 μs   
 @btime mul!($b,$A,$x) # 30.6 μs
 @btime GeometricMultigrid.increment!($st)  # 45.4 μs
-@btime GeometricMultigrid.GS!($st;inner=1) # 149 μs
-@btime GeometricMultigrid.GS!($st;inner=2) # 238 μs
-@btime GeometricMultigrid.GS!($st)         # 773 μs
+@btime GeometricMultigrid.GS!($st;inner=1) # 183 μs
+@btime GeometricMultigrid.GS!($st;inner=2) # 306 μs
 @btime GeometricMultigrid.pseudo!($st)     # 150 μs
