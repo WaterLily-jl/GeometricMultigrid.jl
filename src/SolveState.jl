@@ -43,9 +43,9 @@ function iterate!(st::SolveState,iterator!::Function;
 end
 
 gs!(st::SolveState;kw...) = iterate!(st,GS!;kw...)
-function gs(A::AbstractMatrix,b::AbstractVector;kw...)
+function gs(A::AbstractMatrix,b::AbstractVector;inner=8,kw...)
     x = zero(b)
-    return x,gs!(SolveState(A,x,copy(b));kw...)
+    return x,gs!(SolveState(A,x,copy(b));inner,kw...)
 end
 
 @fastmath function GS!(st;inner=2,kw...)

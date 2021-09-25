@@ -24,7 +24,7 @@ end
 @testset "Poisson.jl" begin
     A,x = setup_2D(3)
     @test diag(A) == -Float64[2,3,2,3,4,3,2,3,2]
-    @test det(A) == 0
+    @test det(A) < 2eps(eltype(A))
     b = A*x
     @test b == repeat(Float64[1,0,-1],3)
     @test dot(b,A,x) == dot(b,b)
