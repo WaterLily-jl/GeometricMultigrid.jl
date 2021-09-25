@@ -4,7 +4,7 @@ High speed Geometric Multigrid solver.
 
 | ![mg solver benchmark](benchmark/MGscaling.png) | 
 |:--:| 
-| Median time [benchmark example](benchmark/benchmark.jl) for `mg!` solver demonstrating `NlogN` scaling with the length of the solution vector. The dots labeled `psueo` utilize the pseudo-inverse smoother designed using AD to achieve approximately 50% speed up with Float32.|
+| Median time [benchmark example](benchmark/benchmark.jl) for `mg!` solver demonstrating `NlogN` scaling with the length of the solution vector.|
 
 ## Usage
 
@@ -85,7 +85,7 @@ julia> st.x
 
 Geometric [multigrid methods](https://en.wikipedia.org/wiki/Multigrid_method) use a recursive approach to solve linear algebra problems stemming from partial differential equations posed on a structured numerical grid. [Algebraic multigrid](https://github.com/JuliaLinearAlgebra/AlgebraicMultigrid.jl) methods apply to a broader class of problems, but are typically not as fast as Geometric Multigrid when applicable. 
 
-The problem on the fine grid is _restricted_ down to a coarsened grid, which is therefore faster to solve, and the solution is _prolongated_ back up to the fine grid where any remaining high-frequency errors are _smoothed_. In this package the coarse grid is simply half the size in every dimension, the restriction operation is a sum over the local points and prolongation is a copy back up to those points. This is done recursively until halving is no longer possible, and then the solution is prolongated all the way back up to the top level in a process called a _V-cycle_. The default smoother is 3 iterations of the Gauss-Sidel method. The benchmark plot above shows this results in solution time with `nlogn` scaling, where `n` is the vector length.
+The problem on the fine grid is _restricted_ down to a coarsened grid, which is therefore faster to solve, and the solution is _prolongated_ back up to the fine grid where any remaining high-frequency errors are _smoothed_. In this package the coarse grid is simply half the size in every dimension, the restriction operation is a sum over the local points and prolongation is a copy back up to those points. This is done recursively until halving is no longer possible, and then the solution is prolongated all the way back up to the top level in a process called a _V-cycle_. The default smoother is 3 iterations of the Gauss-Sidel method. The benchmark plot above shows this results in solution time with `NlogN` scaling with the vector length.
 
 ## Implementation
 
@@ -123,7 +123,7 @@ julia> norm(x,Inf)
 ```
 The `R` field holds the `CartesianIndices` range of the points in the field excluding any buffer elements, with the default being a buffer layer 1-element thick on all boundaries. Note a field vec _acts_ like a 1D vector by default, despite the underlying multidimensional data and buffer. This allows general linear algebra functions to be applied, as shown above.
 
-The extension of this to matrices is the `FieldMatrix` abstract type. The `Poisson` type builds a variable coefficient Poisson matrix from an `N+1` dimensional array `L` which defines the lower diagonals of the matrix. The matrix is symmetric and each row sums to zero, so `L` is sufficient.
+The extension of this to matrices is the `FieldMatrix` abstract type. The `Poisson` type builds a variable coefficient Poisson matrix from an `length(dims)+1` dimensional array `L` which defines the lower diagonals of the matrix. The matrix is symmetric and each row sums to zero, so `L` is sufficient.
 ```julia
 julia> A,_ = setup_2D(3);
 julia> A
