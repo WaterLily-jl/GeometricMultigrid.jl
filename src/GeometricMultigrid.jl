@@ -1,7 +1,7 @@
 module GeometricMultigrid
 
-include("FieldVec.jl")
-export FieldVec, @loop
+include("FieldVector.jl")
+export FieldVector, @loop
 
 include("FieldMatrix.jl")
 export FieldMatrix, Poisson

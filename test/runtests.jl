@@ -3,18 +3,18 @@ using LinearAlgebra, GeometricMultigrid, Test, Statistics
 function setup_2D(n)
     L = zeros(n+2,n+2,2); L[3:n+1,2:n+1,1] .= 1; L[2:n+1,3:n+1,2] .= 1; 
     A = Poisson(L)
-    x = FieldVec(Float64[i-1 for i ∈ 1:n+2, j ∈ 1:n+2])
+    x = FieldVector(Float64[i-1 for i ∈ 1:n+2, j ∈ 1:n+2])
     A,x
 end
 error(x) = norm(x.-Statistics.mean(x))
 
-@testset "FieldVec.jl" begin
+@testset "FieldVector.jl" begin
     A,x = setup_2D(3)
     @test x[1] == 1
     @test x[CartesianIndex(1,1)] == 0
     @test norm(x) == √42
     b = zero(x)
-    @test typeof(b) <: FieldVec
+    @test typeof(b) <: FieldVector
     @test b == zeros(9)
     @loop b[I] = 1/x[I]
     @test !any(isnan.(b.data))

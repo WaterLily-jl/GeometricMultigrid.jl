@@ -27,18 +27,18 @@ end
     @inbounds(x[I]*D[I])+multL(I,L,x)+multU(I,L,x)
 
 import LinearAlgebra: mul!,dot,diag
-mul!(b::FieldVec,p::FieldMatrix,x::FieldVec) = (@loop b[I]=mult(I,p.L,p.D,x); b)
-@fastmath function dot(b::FieldVec,p::FieldMatrix,x::FieldVec)
+mul!(b::FieldVector,p::FieldMatrix,x::FieldVector) = (@loop b[I]=mult(I,p.L,p.D,x); b)
+@fastmath function dot(b::FieldVector,p::FieldMatrix,x::FieldVector)
     s = zero(eltype(x))
     @inbounds @simd for I ∈ b.R
         s+= b[I]*mult(I,p.L,p.D,x)
     end
     s
 end
-diag(p::FieldMatrix) = FieldVec(p.D)
+diag(p::FieldMatrix) = FieldVector(p.D)
 
 import Base: *
-*(p::FieldMatrix,x::FieldVec) = mul!(zero(x),p,x)
+*(p::FieldMatrix,x::FieldVector) = mul!(zero(x),p,x)
 
 """
     Poisson(L)

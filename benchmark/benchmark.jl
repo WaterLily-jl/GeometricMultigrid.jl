@@ -3,7 +3,7 @@ using LinearAlgebra, GeometricMultigrid, BenchmarkTools, Plots
 function setup_2D(n=128,T::Type=Float64)
     L = zeros(T,n+2,n+2,2); L[3:n+1,2:n+1,1] .= 1; L[2:n+1,3:n+1,2] .= 1; 
     x = T[i-1 for i ∈ 1:n+2, j ∈ 1:n+2]
-    Poisson(L),FieldVec(x)
+    Poisson(L),FieldVector(x)
 end
 
 begin
