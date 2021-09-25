@@ -123,11 +123,11 @@ julia> norm(x,Inf)
 ```
 The `R` field holds the `CartesianIndices` range of the points in the field excluding any buffer elements, with the default being a buffer layer 1-element thick on all boundaries. Note a field vec _acts_ like a 1D vector by default, despite the underlying multidimensional data and buffer. This allows general linear algebra functions to be applied, as shown above.
 
-The extension of this to matrices is the `FieldMatrix` abstract type. The `Poisson` type builds a variable coefficient Poisson matrix from an `length(dims)+1` dimensional array `L` which defines the lower diagonals of the matrix. The matrix is symmetric and each row sums to zero, so `L` is sufficient.
+The extension of this to matrices is the `FieldMatrix` type. Currently, this type only defines symmetric matrices with `M=length(dims)` subdiagonals held in an `M+1` dimensional array `L`. The `Poisson` function builds a matrix from `L` with zero-sum rows, which is a requirement for conservative Poisson equations: ∫ ∇⋅β∇ϕ dv = ∮ β ∂ϕ/∂n da.
 ```julia
 julia> A,_ = setup_2D(3);
 julia> A
-9×9 Poisson{Float64, 2, Array{Float64, 3}, Matrix{Float64}}:
+9×9 FieldMatrix{Float64, 2, Array{Float64, 3}, Matrix{Float64}}:
  -2.0   1.0   0.0   1.0   0.0   0.0   0.0   0.0   0.0
   1.0  -3.0   1.0   0.0   1.0   0.0   0.0   0.0   0.0
   0.0   1.0  -2.0   0.0   0.0   1.0   0.0   0.0   0.0

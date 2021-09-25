@@ -3,11 +3,11 @@ module GeometricMultigrid
 include("FieldVec.jl")
 export FieldVec, @loop
 
-include("Poisson.jl")
-export Poisson
+include("FieldMatrix.jl")
+export FieldMatrix, Poisson
 
 include("SolveState.jl")
-export SolveState, gs, gs!
+export SolveState
 
 include("PseudoInv.jl")
 export PseudoInv

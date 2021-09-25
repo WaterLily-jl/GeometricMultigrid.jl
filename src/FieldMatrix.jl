@@ -1,27 +1,8 @@
-abstract type FieldMatrix{T} <: AbstractMatrix{T} end
-"""
-    Poisson
-
-Matrix defined by the conservative variable coefficient Poisson equation
-
-    Ax = [L+D+L']x = b
-
-where `A` is symmetric, block-tridiagonal and extremely sparse. `L` are the lower
-diagonal components (stored as a multi-dimensional array) and the main diagonal is
-`D[I]=-∑ᵢ(L[I,i]+L'[I,i])`.
-"""
-struct Poisson{T,N,Lt<:AbstractArray{T},Dt<:AbstractArray{T,N}} <: FieldMatrix{T}
+struct FieldMatrix{T,N,Lt<:AbstractArray{T},Dt<:AbstractArray{T,N}} <: AbstractMatrix{T}
     L :: Lt # Lower diagonal coefficients
     D :: Dt # Diagonal coefficients
     R :: CartesianIndices{N,NTuple{N,UnitRange{Int}}}
-    function Poisson(L::AbstractArray{T}) where T
-        D = zeros(T,Base.front(size(L)))
-        R = inside(D)
-        for I ∈ R; D[I] = calcdiag(I,L); end
-        new{T,getN(R),typeof(L),typeof(D)}(L,D,R)
-    end
 end
-getN(::CartesianIndices{N}) where N = N
 Base.size(p::FieldMatrix) = (s = length(p.R); (s,s))
 Base.IndexStyle(::Type{<:FieldMatrix}) = IndexCartesian()
 function Base.getindex(p::FieldMatrix{T}, i::Int, j::Int) where T
@@ -38,8 +19,6 @@ function Base.getindex(p::FieldMatrix{T}, i::Int, j::Int) where T
 end
 
 @inline δ(i,N::Int) = CartesianIndex(ntuple(j -> j==i ? 1 : 0, N))
-@fastmath @inline calcdiag(I::CartesianIndex{N},L) where {N} =
-    -sum(@inbounds(L[I,i]+L[I+δ(i,N),i]) for i ∈ 1:N)
 @fastmath @inline multL(I::CartesianIndex{N},L,x) where {N} =
     sum(@inbounds(x[I-δ(i,N)]*L[I,i]) for i ∈ 1:N)
 @fastmath @inline multU(I::CartesianIndex{N},L,x) where {N} =
@@ -60,3 +39,18 @@ diag(p::FieldMatrix) = FieldVec(p.D)
 
 import Base: *
 *(p::FieldMatrix,x::FieldVec) = mul!(zero(x),p,x)
+
+"""
+    Poisson(L)
+
+Construct a symmetric `FieldMatrix` from lower diagonal coefficients `L` with zero-sum rows.
+This is a requirement for conservative Poisson equations: ∫ ∇⋅β∇ϕ dv = ∮ β ∂ϕ/∂n da.
+"""
+function Poisson(L::AbstractArray{T}) where T
+    D = zeros(T,Base.front(size(L)))
+    R = inside(D)
+    for I ∈ R; D[I] = calcdiag(I,L); end
+    FieldMatrix(L,D,R)
+end
+@fastmath @inline calcdiag(I::CartesianIndex{N},L) where {N} =
+    -sum(@inbounds(L[I,i]+L[I+δ(i,N),i]) for i ∈ 1:N)

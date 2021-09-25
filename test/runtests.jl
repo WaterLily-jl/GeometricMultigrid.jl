@@ -21,7 +21,7 @@ error(x) = norm(x.-Statistics.mean(x))
     @test dot(b,x) == 9
 end
 
-@testset "Poisson.jl" begin
+@testset "FieldMatrix.jl" begin
     A,x = setup_2D(3)
     @test diag(A) == -Float64[2,3,2,3,4,3,2,3,2]
     @test det(A) < 2eps(eltype(A))
@@ -38,7 +38,7 @@ end
 @testset "SolveState.jl" begin
     A,x = setup_2D(32)
     @test GeometricMultigrid.residual(A,x,A*x) == zero(x)
-    y,_ = gs(A,A*x,reltol=1e-12)
+    y,_ = GeometricMultigrid.gs(A,A*x,reltol=1e-12)
     @test error(x.-y)<1e-8
 end
 

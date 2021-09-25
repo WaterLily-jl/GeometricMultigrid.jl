@@ -1,4 +1,4 @@
-mutable struct SolveState{T,matT<:Poisson, iDT<:FieldVec, vecT<:FieldVec}
+mutable struct SolveState{T,matT<:FieldMatrix, iDT<:FieldVec, vecT<:FieldVec}
     A::matT
     iD::iDT
     x::vecT
@@ -6,7 +6,7 @@ mutable struct SolveState{T,matT<:Poisson, iDT<:FieldVec, vecT<:FieldVec}
     ϵ::vecT
     child::Union{SolveState, Nothing}
     P::Union{FieldMatrix, Nothing}
-    function SolveState(A::Poisson{T},x::FieldVec,r::FieldVec,invtol=1e-8) where T
+    function SolveState(A::FieldMatrix{T},x::FieldVec,r::FieldVec,invtol=1e-8) where T
         iD = zero(x,T)
         @loop iD[I] = abs(A.D[I])>invtol ? inv(A.D[I]) : zero(T)
         new{eltype(x),typeof(A),typeof(iD),typeof(x)}(A,iD,x,r,zero(x),nothing,nothing)
