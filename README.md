@@ -118,10 +118,10 @@ julia> x.R
  CartesianIndex(3, 2)  CartesianIndex(3, 3)  CartesianIndex(3, 4)
  CartesianIndex(4, 2)  CartesianIndex(4, 3)  CartesianIndex(4, 4)
 
-julia> norm(x,Inf)
+julia> norm(x,Inf)  # does not include buffer elements in x.data
 3.0
 ```
-The `R` field holds the `CartesianIndices` range of the points in the field excluding any buffer elements, with the default being a buffer layer 1-element thick on all boundaries. Note a field vec _acts_ like a 1D vector by default, despite the underlying multidimensional data and buffer. This allows general linear algebra functions to be applied, as shown above.
+The `R` field holds the `CartesianIndices` range of the points in the field excluding any buffer elements, with the default being a buffer layer 1-element thick on all boundaries. Note a `FieldVector` _acts_ like a 1D vector by default, despite the underlying multidimensional data and buffer. This allows general linear algebra functions to be applied, as shown above.
 
 The extension of this to matrices is the `FieldMatrix` type. Currently, this type only defines symmetric matrices with `M=length(dims)` subdiagonals held in an `M+1` dimensional array `L`. The `Poisson` function builds a matrix from `L` with zero-sum rows, which is a requirement for conservative Poisson equations: ∫ ∇⋅β∇ϕ dv = ∮ β ∂ϕ/∂n da.
 ```julia
@@ -156,6 +156,6 @@ julia> eigen(A).values
  -0.9999999999999986
   5.551115175576828e-16
 ```
-Again, this wrapper allows familiar linear algebra functions to be used, without loosing the underlying geometric structure of the data. Fast custom linear algebra functions are defined for `norm(x)`, `dot(x,b)`, `dot(x,A,b)`, `mul!(b,A,x)`.
+Again, this wrapper allows familiar linear algebra functions to be used, without losing the underlying geometric structure of the data. Fast custom linear algebra functions are defined for `norm(x)`, `dot(x,b)`, `dot(x,A,b)`, `mul!(b,A,x)` and `*`.
 
 Finally the `SolveState` is a recursive type which holds the required arrays for the `mg!` function. 
