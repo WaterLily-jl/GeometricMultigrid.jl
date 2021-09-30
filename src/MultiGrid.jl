@@ -36,7 +36,7 @@ end
 
 function create_child(b::AbstractArray{T,N},xT::Type) where {T,N}
     dims = 1 .+ Base.front(size(b)) .÷ 2
-    a = zeros(T,dims...,N)
+    a = zeros(T,dims...,N-1)
     x = FieldVector(zeros(xT,dims))
     for i ∈ 1:N-1, I ∈ x.R
         a[I,i] = 0.5sum(@inbounds(b[J,i]) for J ∈ up(I,i))
