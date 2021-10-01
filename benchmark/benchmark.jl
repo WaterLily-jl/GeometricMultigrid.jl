@@ -12,7 +12,7 @@ begin
     for n ∈ nlist
         A,x = setup_2D(n,Float32)
         suite["mg-gs",n] = @benchmarkable mg!(st) setup=(st=mg_state($A,zero($x),$A*$x))
-        suite["pseudo",n] = @benchmarkable mg!(st) setup=(st=mg_state($A,zero($x),$A*$x,pseudo=true))
+#         suite["pseudo",n] = @benchmarkable mg!(st) setup=(st=mg_state($A,zero($x),$A*$x,pseudo=true))
     end
 end
 
@@ -35,7 +35,7 @@ begin
     A,x = setup_2D()
     b = zero(x)
     st = SolveState(A,zero(x),A*x)
-    st.P = PseudoInv(A)
+#     st.P = PseudoInv(A)
 end
 @btime norm($x)  # 5.3 μs
 @btime dot($b,$x) # 7.8 μs
@@ -44,4 +44,4 @@ end
 @btime GeometricMultigrid.increment!($st)  # 45.4 μs
 @btime GeometricMultigrid.GS!($st;inner=1) # 183 μs
 @btime GeometricMultigrid.GS!($st;inner=2) # 306 μs
-@btime GeometricMultigrid.pseudo!($st)     # 150 μs
+# @btime GeometricMultigrid.pseudo!($st)     # 150 μs
