@@ -1,15 +1,15 @@
-mutable struct SolveState{T,matT<:FieldMatrix, iDT<:FieldVector, vecT<:FieldVector}
+mutable struct SolveState{T,matT<:FieldMatrix, vecT<:FieldVector}
     A::matT
-    iD::iDT
+    iD::vecT
     x::vecT
     r::vecT
     ϵ::vecT
     child::Union{SolveState, Nothing}
     P::Union{FieldMatrix, Nothing}
-    function SolveState(A::FieldMatrix{T},x::FieldVector,r::FieldVector,invtol=1e-8) where T
-        iD = zero(x,T)
+    function SolveState(A::FieldMatrix,x::FieldVector{T},r::FieldVector,invtol=1e-8) where T
+        iD = zero(x)
         @loop iD[I] = abs(A.D[I])>invtol ? inv(A.D[I]) : zero(T)
-        new{eltype(x),typeof(A),typeof(iD),typeof(x)}(A,iD,x,r,zero(x),nothing,nothing)
+        new{T,typeof(A),typeof(x)}(A,iD,x,r,zero(x),nothing,nothing)
     end
 end
 Base.show(io::IO, ::MIME"text/plain", st::SolveState{T}) where T = print(io, "SolveState{",T,"}:\n   ", st)
