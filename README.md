@@ -10,21 +10,26 @@ High speed Geometric Multigrid solver.
 
 Define a matrix and solution
 ```julia
-using GeometricMultigrid
-function setup_2D(n=128,T::Type=Float64)
-    L = zeros(T,n+2,n+2,2); L[3:n+1,2:n+1,1] .= 1; L[2:n+1,3:n+1,2] .= 1; 
-    x = T[i-1 for i ∈ 1:n+2, j ∈ 1:n+2]
-    Poisson(L),FieldVector(x)
-end
+julia> using GeometricMultigrid
+
+julia> function setup_2D(n=128,T::Type=Float64)
+           L = zeros(T,n+2,n+2,2); L[3:n+1,2:n+1,1] .= 1; L[2:n+1,3:n+1,2] .= 1; 
+           x = T[i-1 for i ∈ 1:n+2, j ∈ 1:n+2]
+           Poisson(L),FieldVector(x)
+       end
+
 julia> A,x = setup_2D(4);
 ```
 
 Define the source term and solve.
 ```julia
 julia> b = A*x;
+
 julia> y,it = mg(A,b);
+
 julia> print("number of iterations=",it)
 number of iterations=6
+
 julia> y
 16-element FieldVector{Float64, 2, Matrix{Float64}}:
  -1.487754625809229
@@ -60,6 +65,7 @@ The system can now be solved in-place without further allocation:
 ```julia
 julia> @allocated mg!(st)
 0
+
 julia> st
 SolveState{Float64}:
    residual=1.5436920360020765e-8
@@ -89,9 +95,10 @@ The problem on the fine grid is _restricted_ down to a coarsened grid, which is 
 
 ## Implementation
 
-Geometric Multigrid methods make use of the regular spacial connectivity of the grid to define the _restriction_ and _prolongation_ operators. These concepts are built into the package using the `FieldVector` type, which is simply a wrapper around a multi-dimensional array. 
+Geometric Multigrid methods make use of the regular spatial connectivity of the grid to define the _restriction_ and _prolongation_ operators. These concepts are built into the package using the `FieldVector` type, which is simply a wrapper around a multi-dimensional array. 
 ```julia
 julia> _,x = setup_2D(3);
+
 julia> x
 9-element FieldVector{Float64, 2, Matrix{Float64}}:
  1.0
@@ -121,11 +128,12 @@ julia> x.R
 julia> norm(x,Inf)  # does not include buffer elements in x.data
 3.0
 ```
-The `R` field holds the `CartesianIndices` range of the points in the field excluding any buffer elements, with the default being a buffer layer 1-element thick on all boundaries. Note a `FieldVector` _acts_ like a 1D vector by default, despite the underlying multidimensional data and buffer. This allows general linear algebra functions to be applied, as shown above.
+The `R` field holds the `CartesianIndices` range of the points in the field excluding any buffer elements, with the default being a buffer layer 1-element thick on all boundaries. Note that a `FieldVector` _acts_ like a 1D vector by default, despite the underlying multidimensional data and buffer. This allows general linear algebra functions to be applied, as shown above.
 
-The extension of this to matrices is the `FieldMatrix` type. Currently, this type only defines symmetric matrices with `M=length(dims)` subdiagonals held in an `M+1` dimensional array `L`. The `Poisson` function builds a matrix from `L` with zero-sum rows, which is a requirement for conservative Poisson equations: ∫ ∇⋅β∇ϕ dv = ∮ β ∂ϕ/∂n da.
+The extension of `FieldVector`s to matrices is the `FieldMatrix` type. Currently, this type only defines symmetric matrices with `M=length(dims)` subdiagonals held in an `M+1` dimensional array `L`. The `Poisson` function builds a matrix from `L` with zero-sum rows, which is a requirement for conservative Poisson equations: ∫ ∇⋅β∇ϕ dv = ∮ β ∂ϕ/∂n da.
 ```julia
 julia> A,_ = setup_2D(3);
+
 julia> A
 9×9 FieldMatrix{Float64, 2, Array{Float64, 3}, Matrix{Float64}}:
  -2.0   1.0   0.0   1.0   0.0   0.0   0.0   0.0   0.0
@@ -137,6 +145,7 @@ julia> A
   0.0   0.0   0.0   1.0   0.0   0.0  -2.0   1.0   0.0
   0.0   0.0   0.0   0.0   1.0   0.0   1.0  -3.0   1.0
   0.0   0.0   0.0   0.0   0.0   1.0   0.0   1.0  -2.0
+
 julia> diag(A).data
 5×5 Matrix{Float64}:
  0.0   0.0   0.0   0.0  0.0
@@ -144,6 +153,7 @@ julia> diag(A).data
  0.0  -3.0  -4.0  -3.0  0.0
  0.0  -2.0  -3.0  -2.0  0.0
  0.0   0.0   0.0   0.0  0.0
+
 julia> eigen(A).values
 9-element Vector{Float64}:
  -5.999999999999996
