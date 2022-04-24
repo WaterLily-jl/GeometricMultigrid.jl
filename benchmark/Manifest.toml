@@ -192,6 +192,12 @@ git-tree-sha1 = "cd6efcf9dc746b06709df14e462f0a3fe0786b1e"
 uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
 version = "0.64.2+0"
 
+[[deps.GeometricMultigrid]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "f67d38af105bb5a3818c130dd0cbb23488fea9ca"
+uuid = "ec3bce20-3e4b-4d8a-a801-89defc82be1c"
+version = "0.1.1"
+
 [[deps.GeometryBasics]]
 deps = ["EarCut_jll", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]
 git-tree-sha1 = "83ea630384a13fc4f002b77690bc0afeb4255ac9"

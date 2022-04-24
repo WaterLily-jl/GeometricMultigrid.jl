@@ -30,14 +30,14 @@ end
 savefig("MGscaling.png")
 
 begin
-    A,x = setup_2D()
+    A,x = setup_2D(2^12)
     b = zero(x)
     st = SolveState(A,zero(x),A*x)
 end
-@btime norm($x)  # 5.3 μs
-@btime dot($b,$x) # 7.8 μs
-@btime dot($b,$A,$x) # 29.5 μs   
-@btime mul!($b,$A,$x) # 30.6 μs
+@btime dot($b,$x) # 24(5.5) ms: nthreads()=0(16)
+@btime norm($x)  # 17(2.8) ms
+@btime dot($b,$A,$x) # 83 ms
+@btime mul!($b,$A,$x) # 83(17) ms
 @btime GeometricMultigrid.increment!($st)  # 45.4 μs
 @btime GeometricMultigrid.GS!($st;inner=1) # 183 μs
 @btime GeometricMultigrid.GS!($st;inner=2) # 306 μs
